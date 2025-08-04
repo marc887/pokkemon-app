@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mi colección de cartas Pokémon</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      text-align: center;
+      color: #ef5350;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 3px;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="url"] {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #ef5350;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #d32f2f;
+    }
+    #cartas {
+      margin-top: 20px;
+    }
+    .carta {
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+    }
+    .carta img {
+      width: 80px;
+      height: auto;
+      border-radius: 8px;
+      margin-right: 15px;
+    }
+    .carta-info {
+      flex: 1;
+    }
+    .carta-info h3 {
+      margin: 0 0 5px 0;
+      color: #ef5350;
+    }
+    .buscar {
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+    .buscar input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Mi colección de cartas Pokémon</h1>
+
+  <div class="form-group">
+    <label for="nombre">Nombre de la carta</label>
+    <input type="text" id="nombre" placeholder="Ejemplo: Pikachu" />
+  </div>
+
+  <div class="form-group">
+    <label for="tipo">Tipo</label>
+    <input type="text" id="tipo" placeholder="Ejemplo: Eléctrico" />
+  </div>
+
+  <div class="form-group">
+    <label for="hp">HP</label>
+    <input type="number" id="hp" placeholder="Ejemplo: 60" min="1" />
+  </div>
+
+  <div class="form-group">
+    <label for="imagen">URL de la imagen</label>
+    <input type="url" id="imagen" placeholder="Ejemplo: https://..." />
+  </div>
+
+  <button onclick="agregarCarta()">Agregar Carta</button>
+
+  <div class="buscar">
+    <input type="text" id="buscar" placeholder="Buscar cartas por nombre..." oninput="mostrarCartas()" />
+  </div>
+
+  <div id="cartas"></div>
+
+  <script>
+    const cartasKey = 'cartasPokemon';
+    let cartas = JSON.parse(localStorage.getItem(cartasKey)) || [];
+
+    function guardarCartas() {
+      localStorage.setItem(cartasKey, JSON.stringify(cartas));
+    }
+
+    function agregarCarta() {
+      const nombre = document.getElementById('nombre').value.trim();
+      const tipo = document.getElementById('tipo').value.trim();
+      const hp = parseInt(document.getElementById('hp').value);
+      const imagen = document.getElementById('imagen').value.trim();
+
+      if (!nombre || !tipo || !hp || !imagen) {
+        alert('Por favor, completa todos los campos');
+        return;
+      }
+
+      cartas.push({ nombre, tipo, hp, imagen });
+      guardarCartas();
+      mostrarCartas();
+      limpiarFormulario();
+    }
+
+    function limpiarFormulario() {
+      document.getElementById('nombre').value = '';
+      document.getElementById('tipo').value = '';
+      document.getElementById('hp').value = '';
+      document.getElementById('imagen').value = '';
+    }
+
+    function mostrarCartas() {
+      const filtro = document.getElementById('buscar').value.toLowerCase();
+      const contenedor = document.getElementById('cartas');
+      contenedor.innerHTML = '';
+
+      const filtradas = cartas.filter(carta => carta.nombre.toLowerCase().includes(filtro));
+
+      if (filtradas.length === 0) {
+        contenedor.innerHTML = '<p>No se encontraron cartas.</p>';
+        return;
+      }
+
+      filtradas.forEach((carta, index) => {
+        const cartaDiv = document.createElement('div');
+        cartaDiv.classList.add('carta');
+
+        cartaDiv.innerHTML = `
+          <img src="${carta.imagen}" alt="${carta.nombre}" />
+          <div class="carta-info">
+            <h3>${carta.nombre}</h3>
+            <p><strong>Tipo:</strong> ${carta.tipo}</p>
+            <p><strong>HP:</strong> ${carta.hp}</p>
+            <button onclick="eliminarCarta(${index})" style="background:#d32f2f; margin-top:5px;">Eliminar</button>
+          </div>
+        `;
+
+        contenedor.appendChild(cartaDiv);
+      });
+    }
+
+    function eliminarCarta(index) {
+      if (confirm('¿Quieres eliminar esta carta?')) {
+        cartas.splice(index, 1);
+        guardarCartas();
+        mostrarCartas();
+      }
+    }
+
+    mostrarCartas();
+  </script>
+
+</body>
+</html>
